@@ -1,3 +1,24 @@
+Helper functions for writing tests for [React](https://reactjs.org) with [Jest](https://reactjs.org) and [react-test-renderer](https://www.npmjs.com/package/react-test-renderer).
+
+<br/>
+
+<div align="center">
+
+![Designed for React](https://img.shields.io/static/v1?label&logo=react&logoColor=61DBFB&message=Designed%20for%20React&color=4a4a4a)
+[![Become a Patron](https://img.shields.io/static/v1?label&logo=patreon&logoColor=ffffff&message=Become%20a%20Patron&color=ff424d)](https://www.patreon.com/bePatron?u=27931751)
+
+</div>
+
+<br/>
+
+# Table of Contents
+- [Table of Contents](#table-of-contents)
+- [`createHookInterface`](#createhookinterface)
+- [`createCompoundHookInterface`](#createcompoundhookinterface)
+- [`UNSTABLE_createHocInterface`](#unstable_createhocinterface)
+
+<br/>
+
 # `createHookInterface`
 
 ```js
