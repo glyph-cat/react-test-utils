@@ -14,7 +14,7 @@ test('createCompoundHookInterface', () => {
       },
       actions: {
         increaseCounter: ({ hookValue }) => {
-          const [_counter, setCounter] = hookValue
+          const [, setCounter] = hookValue
           setCounter((c: number) => c + 1)
         },
       },
@@ -39,18 +39,21 @@ test('createCompoundHookInterface', () => {
 
   // Non-existent channel
   expect(() => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore Ignored on purpose to test the error
     chi.at('abc').actions(['increaseCounter'])
   }).toThrow()
 
   // Non-existent action
   expect(() => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore Ignored on purpose to test the error
     chi.at(PATH_A).actions(['abc'])
   }).toThrow()
 
   // Non-existent values
   expect(() => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore Ignored on purpose to test the error
     chi.at(PATH_A).get('abc')
   }).toThrow()

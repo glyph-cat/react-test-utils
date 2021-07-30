@@ -6,7 +6,7 @@ interface CounterState { counter: number }
 
 function withCounter(Component) {
 
-  class WithCounter extends ReactComponent<{}, CounterState> {
+  class WithCounter extends ReactComponent<Record<string, never>, CounterState> {
 
     state = { counter: 0 }
 
@@ -44,7 +44,7 @@ test('UNSTABLE_createHocInterface', () => {
     entry: ({ Component }) => withCounter(Component),
     actions: {
       increaseCounter: ({ props }) => {
-        const [_state, setState] = props.state
+        const [, setState] = props.state
         setState((oldState: CounterState) => ({
           ...oldState,
           counter: oldState.counter + 1,
@@ -72,12 +72,14 @@ test('UNSTABLE_createHocInterface', () => {
 
   // Non-existent action
   expect(() => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore Ignored on purpose to test the error
     chi.actions(['abc'])
   }).toThrow()
 
   // Non-existent values
   expect(() => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore Ignored on purpose to test the error
     chi.get('abc')
   }).toThrow()

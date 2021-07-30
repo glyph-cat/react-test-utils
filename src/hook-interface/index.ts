@@ -1,4 +1,4 @@
-import React, { Fragment, useLayoutEffect } from 'react'
+import { createElement, Fragment, useLayoutEffect } from 'react'
 import { act, create, ReactTestRenderer } from 'react-test-renderer'
 import { appendCleanupQueue, CleanupRef } from '../cleanup-ref/bases'
 import { RootRef } from '../schema'
@@ -128,11 +128,11 @@ export function createCompoundHookInterface<K extends string, A extends string, 
       return null
     }
 
-    renderStack.push(<ChildComponent key={channelKey} />)
+    renderStack.push(createElement(ChildComponent, { key: channelKey }))
   }
 
   let root: ReactTestRenderer
-  act(() => { root = create(<Fragment children={renderStack} />) })
+  act(() => { root = create(createElement(Fragment, {}, renderStack)) })
   appendCleanupQueue(cleanupRef, root.unmount)
 
   return {
