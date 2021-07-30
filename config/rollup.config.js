@@ -4,7 +4,7 @@ import replace from '@rollup/plugin-replace'
 import typescript from 'rollup-plugin-typescript2'
 import { version } from '../package.json'
 
-const INPUT_FILE = 'src/main/index.ts'
+const INPUT_FILE = 'src/index.ts'
 
 const EXTERNAL_LIBS = [
   'react',

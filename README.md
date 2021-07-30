@@ -20,7 +20,7 @@ test('createHookInterface', () => {
     },
     actions: {
       increaseCounter: ({ hookValue }) => {
-        const [_counter, setCounter] = hookValue
+        const [, setCounter] = hookValue
         setCounter((c: number) => c + 1)
       },
       doSomethingElse: ({ hookValue }) => {
@@ -83,7 +83,7 @@ test('createCompoundHookInterface', () => {
       },
       actions: {
         increaseCounter: ({ hookValue }) => {
-          const [_counter, setCounter] = hookValue
+          const [, setCounter] = hookValue
           setCounter((c: number) => c + 1)
         },
         doSomethingElse: ({ hookValue }) => {
