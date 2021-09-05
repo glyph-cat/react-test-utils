@@ -4,8 +4,12 @@ Helper functions for writing tests for [React](https://reactjs.org) with [Jest](
 
 <div align="center">
 
+[![Version](https://img.shields.io/npm/v/langutil.svg)](https://github.com/chin98edwin/react-test-utils/releases)
+[![GitHub](https://img.shields.io/github/license/chin98edwin/react-test-utils)](https://github.com/chin98edwin/react-test-utils/blob/main/LICENSE)
+
 ![Designed for React](https://img.shields.io/static/v1?label&logo=react&logoColor=61DBFB&message=Designed%20for%20React&color=4a4a4a)
-[![Become a Patron](https://img.shields.io/static/v1?label&logo=patreon&logoColor=ffffff&message=Become%20a%20Patron&color=ff424d)](https://www.patreon.com/bePatron?u=27931751)
+[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/chin98edwin/react-test-utils)
+[![Support me on Ko-fi](https://img.shields.io/static/v1?label&logo=kofi&logoColor=ffffff&message=Support%20me%20on%20Ko-fi&color=FF5E5B)](https://ko-fi.com/dev_chin98edwin)
 
 </div>
 
