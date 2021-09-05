@@ -32,13 +32,12 @@ afterEach(() => { cleanupRef.run() })
 
 test('createHookInterface', () => {
   
+  function useMyState() {
+    return useState(0)
+  }
+
   const hookInterface = createHookInterface({
-    hook: {
-      method: useState,
-      parameters: [0],
-      // Hook will be invoked as `method(...parameters)`,
-      // resulting in `useState(0)`
-    },
+    hook: () => useMyState(0)
     actions: {
       increaseCounter: ({ hookValue }) => {
         const [, setCounter] = hookValue
@@ -96,12 +95,13 @@ afterEach(() => { cleanupRef.run() })
 
 test('createCompoundHookInterface', () => {
   
+  function useMyState() {
+    return useState(0)
+  }
+
   const hookInterface = createCompoundHookInterface({
     pathA: {
-      hook: {
-        method: useState,
-        parameters: [0],
-      },
+      hook: useMyState,
       actions: {
         increaseCounter: ({ hookValue }) => {
           const [, setCounter] = hookValue
@@ -123,7 +123,7 @@ test('createCompoundHookInterface', () => {
       // LIMITATION: Hooks on different paths cannot interact with each other.
       // To communicate between different hooks, you will have to create a
       // custom hook that combines them then pass that single hook into the
-      // `hook.method` property.
+      // `hook` property.
     },
   }, cleanupRef)
 

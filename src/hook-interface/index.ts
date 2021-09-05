@@ -8,14 +8,6 @@ type UNSTABLE_FunctionType = (...args: Array<unknown>) => unknown
 /**
  * @public
  */
-export interface HookInterfaceHookSpecs<M extends UNSTABLE_FunctionType> {
-  method: M
-  parameters?: Array<unknown>
-}
-
-/**
- * @public
- */
 export interface HookInterfaceActionDefinition<M extends UNSTABLE_FunctionType> {
   (arg: { hookValue: ReturnType<M> }): void
 }
@@ -31,7 +23,7 @@ export interface HookInterfaceValueMapper<M extends UNSTABLE_FunctionType> {
  * @public
  */
 export interface HookInterfaceChannel<A extends string, V extends string, M extends UNSTABLE_FunctionType> {
-  hook: HookInterfaceHookSpecs<M>
+  hook: M
   actions?: Record<A, HookInterfaceActionDefinition<M>>
   values?: Record<V, HookInterfaceValueMapper<M>>
 }
@@ -101,10 +93,9 @@ export function createCompoundHookInterface<K extends string, A extends string, 
       retrievableValues: {},
     }
     const { hook, actions = {}, values = {} } = channels[channelKey]
-    const { method: hookMethod, parameters: hookParameters = [] } = hook
 
     const ChildComponent = () => {
-      const hookData = hookMethod(...hookParameters)
+      const hookData = hook()
       useLayoutEffect(() => { renderCount[channelKey] += 1 })
 
       const actionKeys = Object.keys(actions)

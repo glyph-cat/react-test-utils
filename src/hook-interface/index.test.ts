@@ -6,12 +6,14 @@ test('createCompoundHookInterface', () => {
 
   const PATH_A = 'pathA'
   const cleanupRef = createCleanupRef()
+
+  function useMyState() {
+    return useState(0)
+  }
+
   const chi = createCompoundHookInterface({
     [PATH_A]: {
-      hook: {
-        method: useState,
-        parameters: [0],
-      },
+      hook: useMyState,
       actions: {
         increaseCounter: ({ hookValue }) => {
           const [, setCounter] = hookValue
