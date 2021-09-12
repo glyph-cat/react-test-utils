@@ -13,7 +13,7 @@
     "clean": "rm -rf ./dist ./temp ./yarn-error.log && mkdir temp dist ",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "jest",
+    "test": "jest ./src",
     "rollup": "rollup -c ./config/rollup.config.js",
     "tsc": "tsc --declaration",
     "api": "api-extractor run -c ./config/api-extractor.json --local --verbose",
