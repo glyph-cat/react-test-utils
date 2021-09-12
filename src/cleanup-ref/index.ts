@@ -15,3 +15,5 @@ export function createCleanupRef(): CleanupRef {
   }
   return self
 }
+
+export { CleanupRef } from './bases'

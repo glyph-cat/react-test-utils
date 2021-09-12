@@ -37,7 +37,7 @@ function withCounter(Component) {
 
 }
 
-test('UNSTABLE_createHocInterface', () => {
+test(UNSTABLE_createHocInterface.name, () => {
 
   const cleanupRef = createCleanupRef()
   const chi = UNSTABLE_createHocInterface({

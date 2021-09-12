@@ -4,7 +4,7 @@ Helper functions for writing tests for [React](https://reactjs.org) with [Jest](
 
 <div align="center">
 
-[![Version](https://img.shields.io/npm/v/langutil.svg)](https://github.com/chin98edwin/react-test-utils/releases)
+[![Version](https://img.shields.io/npm/v/@chin98edwin/react-test-utils)](https://github.com/chin98edwin/react-test-utils/releases)
 [![GitHub](https://img.shields.io/github/license/chin98edwin/react-test-utils)](https://github.com/chin98edwin/react-test-utils/blob/main/LICENSE)
 
 ![Designed for React](https://img.shields.io/static/v1?label&logo=react&logoColor=61DBFB&message=Designed%20for%20React&color=4a4a4a)
@@ -15,18 +15,11 @@ Helper functions for writing tests for [React](https://reactjs.org) with [Jest](
 
 <br/>
 
-# Table of Contents
-- [Table of Contents](#table-of-contents)
-- [`createHookInterface`](#createhookinterface)
-- [`createCompoundHookInterface`](#createcompoundhookinterface)
-- [`UNSTABLE_createHocInterface`](#unstable_createhocinterface)
-
-<br/>
-
-# `createHookInterface`
+# Simple Example
 
 ```js
-import { 
+import { useState } from 'react'
+import {
   createCleanupRef,
   createHookInterface,
 } from '@chin98edwin/react-test-utils'
@@ -35,143 +28,39 @@ const cleanupRef = createCleanupRef()
 afterEach(() => { cleanupRef.run() })
 
 test('createHookInterface', () => {
-  
-  function useMyState() {
-    return useState(0)
-  }
-
   const hookInterface = createHookInterface({
-    hook: () => useMyState(0)
+    useHook: () => useState(0),
     actions: {
-      increaseCounter: ({ hookValue }) => {
-        const [, setCounter] = hookValue
+      increaseCounter({ hookData }) {
+        const [, setCounter] = hookData
         setCounter((c: number) => c + 1)
       },
-      doSomethingElse: ({ hookValue }) => {
-        // ...
-      }
     },
     values: {
-      value: ({ hookValue }) => {
-        const [counter] = hookValue
-        return `${counter}`
-      },
-      customVariable: ({ hookValue }) => {
-        return '...'
+      value({ hookData }) {
+        const [counter] = hookData
+        return counter
       },
     },
   }, cleanupRef)
 
-  // Get render count
-  expect(hookInterface.getRenderCount()).toBe(1)
+  // Trigger one action
+  hookInterface.actions('increaseCounter')
 
-  // Trigger an action
-  // NOTE: When actions are called separately like this, they will be executed
-  // in separate render cycles.
-  hookInterface.actions(['increaseCounter'])
-  hookInterface.actions(['increaseCounter'])
-
-  // Trigger multiple actions
-  // NOTE: When actions are called in an array, they will be executed in the
-  // same render cycle.
-  hookInterface.actions(['increaseCounter', 'doSomethingElse'])
-
-  // Get value
-  expect(hookInterface.get('value')).toBe(someValue)
-  expect(hookInterface.get('customVariable')).toBe('...')
-
-})
-
-```
-
-<br/>
-
-# `createCompoundHookInterface`
-
-```js
-import { 
-  createCleanupRef,
-  createCompoundHookInterface,
-} from '@chin98edwin/react-test-utils'
-
-const cleanupRef = createCleanupRef()
-afterEach(() => { cleanupRef.run() })
-
-test('createCompoundHookInterface', () => {
-  
-  function useMyState() {
-    return useState(0)
-  }
-
-  const hookInterface = createCompoundHookInterface({
-    pathA: {
-      hook: useMyState,
-      actions: {
-        increaseCounter: ({ hookValue }) => {
-          const [, setCounter] = hookValue
-          setCounter((c: number) => c + 1)
-        },
-        doSomethingElse: ({ hookValue }) => {
-          // ...
-        }
-      },
-      values: {
-        value: ({ hookValue }) => {
-          const [counter] = hookValue
-          return `${counter}`
-        },
-      },
-    },
-    pathB: {
-      // You can specify the setup for another hook here
-      // LIMITATION: Hooks on different paths cannot interact with each other.
-      // To communicate between different hooks, you will have to create a
-      // custom hook that combines them then pass that single hook into the
-      // `hook` property.
-    },
-  }, cleanupRef)
+  // Trigger multiple actions in the same render
+  hookInterface.actions('increaseCounter', 'increaseCounter')
 
   // Get render count
-  expect(hookInterface.at('pathA').getRenderCount()).toBe(1)
-
-  // Trigger an action
-  hookInterface.at('pathA').actions(['increaseCounter'])
-
-  // Trigger multiple actions
-  hookInterface.at('pathA').actions(['increaseCounter', 'doSomethingElse'])
-  hookInterface.at('pathB').actions(['unicornFunction'])
-  hookInterface.at('pathB').actions(['unicornFunction', 'unicornFunction'])
-  hookInterface.at('pathA').actions(['doSomethingElse'])
+  expect(hookInterface.getRenderCount()).toBe(2)
 
   // Get value
-  expect(hookInterface.at('pathA').get('value')).toBe(someValue)
-  expect(hookInterface.at('pathB').get('value')).toBe(someOtherValue)
+  expect(hookInterface.get('value')).toBe(3)
 
 })
-
 ```
 
-<br/>
-
-# `UNSTABLE_createHocInterface`
-
-```js
-import { 
-  createCleanupRef,
-  UNSTABLE_createHocInterface,
-} from '@chin98edwin/react-test-utils'
-
-const cleanupRef = createCleanupRef()
-afterEach(() => { cleanupRef.run() })
-
-test('UNSTABLE_createHocInterface', () => {
-  
-  const hocInterface = UNSTABLE_createHocInterface({
-    entry: ({ Component }) => withYourHoc(Component),
-  })
-
-})
-
-```
+# Full Examples
+* [`createHookInterface`](https://github.com/chin98edwin/react-test-utils/blob/main/src/hook-interface/index.test.ts)
+* [`UNSTABLE_createHocInterface`](https://github.com/chin98edwin/react-test-utils/blob/main/src/hoc-interface/index.test.tsx)
 
 <br/>
