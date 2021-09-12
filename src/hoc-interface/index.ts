@@ -13,7 +13,7 @@ export interface HocInterfaceChannel<A extends string, V extends string> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   actions?: Record<A, (props: any) => void>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  values?: Record<V, (hookData: ReturnType<any>) => string>
+  values?: Record<V, (hocData: ReturnType<any>) => string>
 }
 
 /**

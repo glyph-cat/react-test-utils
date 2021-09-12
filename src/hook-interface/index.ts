@@ -1,165 +1,167 @@
-import { createElement, Fragment, useLayoutEffect } from 'react'
+import { createElement, useLayoutEffect } from 'react'
 import { act, create, ReactTestRenderer } from 'react-test-renderer'
 import { appendCleanupQueue, CleanupRef } from '../cleanup-ref/bases'
+import { propertyExists } from '../object-utils'
 import { RootRef } from '../schema'
-
-type UNSTABLE_FunctionType = (...args: Array<unknown>) => unknown
+import { isThenable } from '../type-check'
 
 /**
  * @public
  */
-export interface HookInterfaceActionDefinition<M extends UNSTABLE_FunctionType> {
-  (arg: { hookValue: ReturnType<M> }): void
+export type GenericHookType = (...args: Array<unknown>) => unknown
+
+/**
+ * @public
+ */
+export interface HookInterfaceActionDefinition<H extends GenericHookType> {
+  (arg: { hookData: ReturnType<H> }): void
 }
 
 /**
  * @public
  */
-export interface HookInterfaceValueMapper<M extends UNSTABLE_FunctionType> {
-  (arg: { hookValue: ReturnType<M> }): unknown
+export interface HookInterfaceValueMapper<H extends GenericHookType> {
+  (arg: { hookData: ReturnType<H> }): unknown
 }
 
 /**
  * @public
  */
-export interface HookInterfaceChannel<A extends string, V extends string, M extends UNSTABLE_FunctionType> {
-  hook: M
-  actions?: Record<A, HookInterfaceActionDefinition<M>>
-  values?: Record<V, HookInterfaceValueMapper<M>>
+export interface HookInterfaceChannel<A extends string, V extends string, H extends GenericHookType> {
+  useHook: H
+  actions?: Partial<Record<A, HookInterfaceActionDefinition<H>>>
+  values?: Partial<Record<V, HookInterfaceValueMapper<H>>>
 }
 
 /**
  * @public
  */
-export type HookInterfaceChannelsCollection<K extends string, A extends string, V extends string, M extends UNSTABLE_FunctionType> = Record<K, HookInterfaceChannel<A, V, M>>
+export type HookInterfaceChannelsCollection<K extends string, A extends string, V extends string, H extends GenericHookType> = Record<K, HookInterfaceChannel<A, V, H>>
 
 /**
  * @public
  */
 export interface HookInterface<A extends string, V extends string> {
   root: RootRef,
-  actions(actionKeyStack: Array<A>): void,
-  get(valueKey: V): string
+  actionAsync(actionKey: A): Promise<void>
+  actions(...actionKeyStack: Array<A>): void
+  get(valueKey: V): unknown | Promise<unknown>
   getRenderCount(): number
 }
 
 /**
- * @public
+ * @internal
  */
-export interface CompoundHookInterface<K extends string, A extends string, V extends string> {
-  root: RootRef,
-  at(channelKey: K): Omit<HookInterface<A, V>, 'root'>
+interface IOSchema<A extends string, V extends string> {
+  dispatchableActions: Partial<Record<A, () => unknown>>,
+  retrievableValues: Partial<Record<V, unknown>>,
 }
 
 /**
  * A wrapper for testing a React Hook by abstracting the DOM container's logic.
  * @public
  */
-export function createHookInterface<A extends string, V extends string, M extends UNSTABLE_FunctionType>(
-  config: HookInterfaceChannel<A, V, M>,
+export function createHookInterface<
+  A extends string,
+  V extends string,
+  H extends GenericHookType
+>(
+  config: HookInterfaceChannel<A, V, H>,
   cleanupRef: CleanupRef
 ): HookInterface<A, V> {
-  const chi = createCompoundHookInterface({ a: config }, cleanupRef)
-  return {
-    root: chi.root,
-    actions: chi.at('a').actions,
-    get: chi.at('a').get,
-    getRenderCount: chi.at('a').getRenderCount,
+
+  const { useHook, actions = {}, values = {} } = config
+  let renderCount = 0
+
+  const io: IOSchema<A, V> = {
+    dispatchableActions: {},
+    retrievableValues: {},
   }
-}
 
-/**
- * A wrapper for testing multiple React Hooks by abstracting the DOM container's
- * logic.
- * @public
- */
-export function createCompoundHookInterface<K extends string, A extends string, V extends string, M extends UNSTABLE_FunctionType>(
-  channels: HookInterfaceChannelsCollection<K, A, V, M>,
-  cleanupRef: CleanupRef
-): CompoundHookInterface<K, A, V> {
+  const ContainerComponent = (): JSX.Element => {
+    const hookData = useHook()
+    useLayoutEffect(() => { renderCount += 1 })
 
-  const renderStack = []
-  const renderCount = {}
-  const outlets = {}
-
-  const channelKeys = Object.keys(channels)
-  const channelValueKeysCache = {}
-  for (let i = 0; i < channelKeys.length; i++) {
-    const channelKey = channelKeys[i]
-
-    renderCount[channelKey] = 0
-    outlets[channelKey] = {
-      dispatchableActions: {},
-      retrievableValues: {},
-    }
-    const { hook, actions = {}, values = {} } = channels[channelKey]
-
-    const ChildComponent = () => {
-      const hookData = hook()
-      useLayoutEffect(() => { renderCount[channelKey] += 1 })
-
-      const actionKeys = Object.keys(actions)
-      outlets[channelKey].dispatchableActions = {}
-      for (const actionKey of actionKeys) {
-        const actionCallback = actions[actionKey]
-        outlets[channelKey].dispatchableActions[actionKey] = () => {
-          actionCallback({ hookValue: hookData })
-        }
+    const actionKeys = Object.keys(actions)
+    io.dispatchableActions = {}
+    for (const actionKey of actionKeys) {
+      const actionCallback = actions[actionKey]
+      io.dispatchableActions[actionKey] = (): unknown => {
+        return actionCallback({ hookData })
       }
-
-      const valueKeys = Object.keys(values)
-      channelValueKeysCache[channelKey] = valueKeys
-      outlets[channelKey].retrievableValues = {}
-      for (const valueKey of valueKeys) {
-        const valueMapper = values[valueKey]
-        const mappedValue = valueMapper({ hookValue: hookData })
-        outlets[channelKey].retrievableValues[valueKey] = mappedValue
-      }
-
-      return null
     }
 
-    renderStack.push(createElement(ChildComponent, { key: channelKey }))
+    const valueKeys = Object.keys(values)
+    io.retrievableValues = {}
+    for (const valueKey of valueKeys) {
+      const valueMapper = values[valueKey]
+      const mappedValue = valueMapper({ hookData })
+      io.retrievableValues[valueKey] = mappedValue
+    }
+
+    return null
   }
 
   let root: ReactTestRenderer
-  act(() => { root = create(createElement(Fragment, {}, renderStack)) })
+  act((): void => { root = create(createElement(ContainerComponent)) })
   appendCleanupQueue(cleanupRef, root.unmount)
+
+  // NOTE: Array of actions are batched in one `act()`
+  const METHOD_actions = (...actionKeyStack: Array<A>): void => {
+    act((): void => {
+      for (const actionKey of actionKeyStack) {
+        if (propertyExists(io.dispatchableActions, actionKey)) {
+          io.dispatchableActions[actionKey]()
+        } else {
+          throw new ReferenceError(`Action '${actionKey}' does not exist`)
+        }
+      }
+    })
+  }
+
+  const METHOD_actionAsync = async (
+    actionKey: A,
+    ...otherActionKeys: Array<A>
+  ): Promise<void> => {
+    if (otherActionKeys.length !== 0) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'Batch-executing actions does not work in `actionAsync` because ' +
+        'components will re-render before the next asynchronous action(s) ' +
+        'can run.\n' +
+        `In: .actionAsync('${actionKey}', '${otherActionKeys.join('\', \'')}')`
+      )
+    }
+    await act(async (): Promise<void> => {
+      if (propertyExists(io.dispatchableActions, actionKey)) {
+        await io.dispatchableActions[actionKey]()
+      } else {
+        throw new ReferenceError(`Async action '${actionKey}' does not exist`)
+      }
+    })
+  }
+
+  const METHOD_get = (valueKey: V): unknown | Promise<unknown> => {
+    if (propertyExists(io.retrievableValues, valueKey)) {
+      const retrievedValue = io.retrievableValues[valueKey]
+      if (isThenable(retrievedValue)) {
+        return new Promise((resolve) => {
+          retrievedValue.then(resolve)
+        })
+      } else {
+        return retrievedValue
+      }
+    } else {
+      throw new ReferenceError(`Value '${valueKey}' does not exist`)
+    }
+  }
 
   return {
     root: { current: root },
-    at: (channelKey: string) => {
-      if (!outlets[channelKey]) {
-        throw new ReferenceError(`Channel '${channelKey}' is undefined`)
-      }
-      return {
-        actions: (actionKeyStack: Array<string>) => {
-          if (!Array.isArray(actionKeyStack)) {
-            // This allows multiple actions to be invoked in the same `act()` callback
-            actionKeyStack = [actionKeyStack]
-          }
-          act(() => {
-            // Array of actions are batched in one `act()`
-            for (const actionKey of actionKeyStack) {
-              if (!outlets[channelKey].dispatchableActions[actionKey]) {
-                throw new ReferenceError(
-                  `Action '${actionKey} in '${channelKey}' is undefined`
-                )
-              }
-              outlets[channelKey].dispatchableActions[actionKey]()
-            }
-          })
-        },
-        get: (valueKey: string) => {
-          if (!channelValueKeysCache[channelKey].includes(valueKey)) {
-            throw new ReferenceError(
-              `Value '${valueKey}' in '${channelKey}' is undefined`
-            )
-          }
-          return outlets[channelKey].retrievableValues[valueKey]
-        },
-        getRenderCount: () => renderCount[channelKey],
-      }
-    },
+    actions: METHOD_actions,
+    actionAsync: METHOD_actionAsync,
+    get: METHOD_get,
+    getRenderCount: () => renderCount
   }
+
 }
