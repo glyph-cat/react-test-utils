@@ -31,7 +31,8 @@ export interface HocInterfaceConfig<A extends string, V extends string> {
  */
 export interface HocInterface<A extends string, V extends string> {
   root: RootRef
-  actions(actionKeyStack: Array<A>): void,
+  actions(...actionKeyStack: Array<A>): void
+  actionsAsync(...actionKeyStack: Array<A>): Promise<void>
   get(valueKey: V): string
   getRenderCount(): number
 }
@@ -97,7 +98,7 @@ export function UNSTABLE_createHocInterface<A extends string, V extends string>(
 
   return {
     root: { current: root },
-    actions: (actionKeyStack: Array<string>) => {
+    actions: (...actionKeyStack: Array<string>): void => {
       if (!Array.isArray(actionKeyStack)) {
         // This allows multiple actions to be invoked in the same `act()` callback
         actionKeyStack = [actionKeyStack]
@@ -109,6 +110,21 @@ export function UNSTABLE_createHocInterface<A extends string, V extends string>(
             throw new ReferenceError(`Action '${actionKey}' is undefined`)
           }
           dispatchableActions[actionKey]()
+        }
+      })
+    },
+    actionsAsync: async (...actionKeyStack: Array<string>): Promise<void> => {
+      if (!Array.isArray(actionKeyStack)) {
+        // This allows multiple actions to be invoked in the same `act()` callback
+        actionKeyStack = [actionKeyStack]
+      }
+      await act(async () => {
+        // Actions are not guaranteed to be batched in the same render cycle
+        for (const actionKey of actionKeyStack) {
+          if (!dispatchableActions[actionKey]) {
+            throw new ReferenceError(`Action '${actionKey}' is undefined`)
+          }
+          await dispatchableActions[actionKey]()
         }
       })
     },

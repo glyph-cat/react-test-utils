@@ -37,7 +37,7 @@ function withCounter(Component) {
 
 }
 
-test(UNSTABLE_createHocInterface.name, () => {
+test(UNSTABLE_createHocInterface.name, async (): Promise<void> => {
 
   const cleanupRef = createCleanupRef()
   const chi = UNSTABLE_createHocInterface({
@@ -64,11 +64,21 @@ test(UNSTABLE_createHocInterface.name, () => {
   expect(chi.get('value')).toBe(0)
 
   // After increment
-  chi.actions(['increaseCounter'])
-  chi.actions(['increaseCounter'])
-  chi.actions(['increaseCounter'])
+  chi.actions('increaseCounter')
+  chi.actions('increaseCounter')
+  chi.actions('increaseCounter')
   expect(chi.getRenderCount()).toBe(4)
   expect(chi.get('value')).toBe(3)
+
+  // Batched increment
+  chi.actions('increaseCounter', 'increaseCounter', 'increaseCounter')
+  expect(chi.getRenderCount()).toBe(5)
+  expect(chi.get('value')).toBe(6)
+
+  // Batched increment
+  await chi.actionsAsync('increaseCounter', 'increaseCounter', 'increaseCounter')
+  expect(chi.getRenderCount()).toBe(8)
+  expect(chi.get('value')).toBe(9)
 
   // Non-existent action
   expect(() => {
