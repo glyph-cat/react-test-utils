@@ -46,7 +46,7 @@ export interface HookInterface<A extends string, V extends string> {
   actions(...actionKeyStack: Array<A>): void
   actionsAsync(...actionKeyStack: Array<A>): Promise<void>
   /**
-   * @deprecated
+   * @deprecated Use `actionsAsync` instead.
    */
   actionAsync(...actionKeyStack: Array<A>): Promise<void>
   get(valueKey: V): unknown | Promise<unknown>
