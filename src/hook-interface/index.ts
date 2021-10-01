@@ -43,8 +43,12 @@ export type HookInterfaceChannelsCollection<K extends string, A extends string, 
  */
 export interface HookInterface<A extends string, V extends string> {
   root: RootRef,
-  actionAsync(actionKey: A): Promise<void>
   actions(...actionKeyStack: Array<A>): void
+  actionsAsync(...actionKeyStack: Array<A>): Promise<void>
+  /**
+   * @deprecated
+   */
+  actionAsync(...actionKeyStack: Array<A>): Promise<void>
   get(valueKey: V): unknown | Promise<unknown>
   getRenderCount(): number
 }
@@ -119,6 +123,20 @@ export function createHookInterface<
     })
   }
 
+  const METHOD_actionsAsync = async (
+    ...actionKeyStack: Array<A>
+  ): Promise<void> => {
+    await act(async (): Promise<void> => {
+      for (const actionKey of actionKeyStack) {
+        if (propertyExists(io.dispatchableActions, actionKey)) {
+          await io.dispatchableActions[actionKey]()
+        } else {
+          throw new ReferenceError(`Action '${actionKey}' does not exist`)
+        }
+      }
+    })
+  }
+
   const METHOD_actionAsync = async (
     actionKey: A,
     ...otherActionKeys: Array<A>
@@ -160,6 +178,7 @@ export function createHookInterface<
     root: { current: root },
     actions: METHOD_actions,
     actionAsync: METHOD_actionAsync,
+    actionsAsync: METHOD_actionsAsync,
     get: METHOD_get,
     getRenderCount: () => renderCount
   }

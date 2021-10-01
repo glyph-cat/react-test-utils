@@ -88,9 +88,23 @@ describe(createHookInterface.name, () => {
     await hookInterface.actionAsync('increaseCounter')
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore Ignored on purpose to test the error
-    await hookInterface.actionAsync('increaseCounter', 'increaseCounter')
+    await hookInterface.actionAsync(
+      'increaseCounter',
+      'increaseCounter',
+    )
     expect(hookInterface.getRenderCount()).toBe(3)
     expect((await hookInterface.get('value'))).toBe(2)
+
+    // Experimental async actions - basically each async action will be executed
+    // on one render, no more batching :(
+    await hookInterface.actionsAsync(
+      'increaseCounter',
+      'increaseCounter',
+      'increaseCounter',
+      'increaseCounter',
+    )
+    expect(hookInterface.getRenderCount()).toBe(7)
+    expect((await hookInterface.get('value'))).toBe(6)
 
     // Non-existent action
     await expect(async () => {
