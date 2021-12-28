@@ -26,6 +26,7 @@ function getPlugins({
 } = {}) {
 
   const basePlugins = {
+    autoImportReact: autoImportReact(),
     typescript: typescript({
       tsconfigOverride: {
         compilerOptions: {
@@ -36,8 +37,13 @@ function getPlugins({
       },
     }),
     babel: babel({
-      presets,
-      plugins: ['@babel/plugin-proposal-optional-chaining'],
+      presets: [
+        ...presets,
+        '@babel/preset-react',
+      ],
+      plugins: [
+        '@babel/plugin-proposal-optional-chaining',
+      ],
       exclude: '**/node_modules/**',
       babelHelpers: 'bundled',
     }),
@@ -105,22 +111,40 @@ const config = [
 
 export default config
 
+/**
+ * Automatically `imports React from "react"` if a file ends with '.tsx'.
+ */
+function autoImportReact() {
+  return {
+    name: 'autoImportReact',
+    transform(code, id) {
+      if (/tsx/gi.test(id)) {
+        code = 'import React from "react";\n' + code
+        return { code }
+      }
+      return null
+    },
+  }
+}
+
+/**
+ * Removes redundant license information about tslib that is wasting precious
+ * bytes in the final code bundle.
+ */
 function forceCleanup() {
   return {
     name: 'forceCleanup',
-    transform: (code, id) => {
+    transform(code, id) {
       if (id.includes('tslib')) {
-        return new Promise((resolve) => {
-          const indexOfFirstCommentCloseAsterisk = code.indexOf('*/')
-          if (indexOfFirstCommentCloseAsterisk >= 0) {
-            // +2 to include the 2 searched characters as well
-            code = code.substring(
-              indexOfFirstCommentCloseAsterisk + 2,
-              code.length
-            )
-          }
-          resolve({ code })
-        })
+        const indexOfFirstCommentCloseAsterisk = code.indexOf('*/')
+        if (indexOfFirstCommentCloseAsterisk >= 0) {
+          // +2 to include the 2 searched characters as well
+          code = code.substring(
+            indexOfFirstCommentCloseAsterisk + 2,
+            code.length
+          )
+        }
+        return { code }
       }
       return null
     },
