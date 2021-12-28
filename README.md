@@ -69,7 +69,7 @@ test('createHookInterface', () => {
 
 <br/>
 
-# Support Me
+# Support This Project
 
 * Ko-fi: [`ko-fi.com/glyphcat`](https://ko-fi.com/glyphcat)
 * BTC: [`bc1q5qp6a972l8m0k26ln9deuhup0nmldf86ndu5we`](bitcoin:bc1q5qp6a972l8m0k26ln9deuhup0nmldf86ndu5we)
