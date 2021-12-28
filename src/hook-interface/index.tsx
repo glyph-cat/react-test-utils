@@ -1,9 +1,7 @@
-import { createElement, useLayoutEffect } from 'react'
+import { hasProperty, isThenable, useLayoutEffect } from '@glyph-cat/swiss-army-knife'
 import { act, create, ReactTestRenderer } from 'react-test-renderer'
-import { appendCleanupQueue, CleanupRef } from '../cleanup-ref/bases'
-import { propertyExists } from '../object-utils'
+import { appendCleanupQueue, CleanupRef } from '../cleanup-ref'
 import { RootRef } from '../schema'
-import { isThenable } from '../type-check'
 
 /**
  * @public
@@ -107,14 +105,14 @@ export function createHookInterface<
   }
 
   let root: ReactTestRenderer
-  act((): void => { root = create(createElement(ContainerComponent)) })
+  act((): void => { root = create(<ContainerComponent />) })
   appendCleanupQueue(cleanupRef, root.unmount)
 
   // NOTE: Array of actions are batched in one `act()`
   const METHOD_actions = (...actionKeyStack: Array<A>): void => {
     act((): void => {
       for (const actionKey of actionKeyStack) {
-        if (propertyExists(io.dispatchableActions, actionKey)) {
+        if (hasProperty(io.dispatchableActions, actionKey)) {
           io.dispatchableActions[actionKey]()
         } else {
           throw new ReferenceError(`Action '${actionKey}' does not exist`)
@@ -128,7 +126,7 @@ export function createHookInterface<
   ): Promise<void> => {
     await act(async (): Promise<void> => {
       for (const actionKey of actionKeyStack) {
-        if (propertyExists(io.dispatchableActions, actionKey)) {
+        if (hasProperty(io.dispatchableActions, actionKey)) {
           await io.dispatchableActions[actionKey]()
         } else {
           throw new ReferenceError(`Action '${actionKey}' does not exist`)
@@ -151,7 +149,7 @@ export function createHookInterface<
       )
     }
     await act(async (): Promise<void> => {
-      if (propertyExists(io.dispatchableActions, actionKey)) {
+      if (hasProperty(io.dispatchableActions, actionKey)) {
         await io.dispatchableActions[actionKey]()
       } else {
         throw new ReferenceError(`Async action '${actionKey}' does not exist`)
@@ -160,7 +158,7 @@ export function createHookInterface<
   }
 
   const METHOD_get = (valueKey: V): unknown | Promise<unknown> => {
-    if (propertyExists(io.retrievableValues, valueKey)) {
+    if (hasProperty(io.retrievableValues, valueKey)) {
       const retrievedValue = io.retrievableValues[valueKey]
       if (isThenable(retrievedValue)) {
         return new Promise((resolve) => {

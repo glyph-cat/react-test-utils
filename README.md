@@ -4,12 +4,12 @@ Helper functions for writing tests for [React](https://reactjs.org) with [Jest](
 
 <div align="center">
 
-[![Version](https://img.shields.io/npm/v/@chin98edwin/react-test-utils)](https://github.com/chin98edwin/react-test-utils/releases)
-[![License](https://img.shields.io/github/license/chin98edwin/react-test-utils)](https://github.com/chin98edwin/react-test-utils/blob/main/LICENSE)
+[![Version](https://img.shields.io/npm/v/@glyph-cat/react-test-utils)](https://github.com/glyph-cat/react-test-utils/releases)
+[![License](https://img.shields.io/github/license/glyph-cat/react-test-utils)](https://github.com/glyph-cat/react-test-utils/blob/main/LICENSE)
 
 ![Designed for React](https://img.shields.io/static/v1?label&logo=react&logoColor=61DBFB&message=Designed%20for%20React&color=4a4a4a)
-[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/chin98edwin/react-test-utils)
-[![Support me on Ko-fi](https://img.shields.io/static/v1?label&logo=kofi&logoColor=ffffff&message=Support%20me%20on%20Ko-fi&color=FF5E5B)](https://ko-fi.com/dev_chin98edwin)
+[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/glyph-cat/react-test-utils)
+[![Support me on Ko-fi](https://img.shields.io/static/v1?label&logo=kofi&logoColor=ffffff&message=Support%20me%20on%20Ko-fi&color=FF5E5B)](https://ko-fi.com/glyphcat)
 
 </div>
 
@@ -22,7 +22,7 @@ import { useState } from 'react'
 import {
   createCleanupRef,
   createHookInterface,
-} from '@chin98edwin/react-test-utils'
+} from '@glyph-cat/react-test-utils'
 
 const cleanupRef = createCleanupRef()
 afterEach(() => { cleanupRef.run() })
@@ -64,15 +64,14 @@ test('createHookInterface', () => {
 ```
 
 # Full Examples
-* [`createHookInterface`](https://github.com/chin98edwin/react-test-utils/blob/main/src/hook-interface/index.test.ts)
-* [`UNSTABLE_createHocInterface`](https://github.com/chin98edwin/react-test-utils/blob/main/src/hoc-interface/index.test.tsx)
+* [`createHookInterface`](https://github.com/glyph-cat/react-test-utils/blob/main/src/hook-interface/index.test.ts)
+* [`UNSTABLE_createHocInterface`](https://github.com/glyph-cat/react-test-utils/blob/main/src/hoc-interface/index.test.tsx)
 
 <br/>
 
 # Support Me
 
-* Ko-fi: [`ko-fi.com/dev_chin98edwin`](https://ko-fi.com/dev_chin98edwin)
-* PayPal: [`paypal.me/chin98edwin`](http://paypal.me/chin98edwin)
+* Ko-fi: [`ko-fi.com/glyphcat`](https://ko-fi.com/glyphcat)
 * BTC: [`bc1q5qp6a972l8m0k26ln9deuhup0nmldf86ndu5we`](bitcoin:bc1q5qp6a972l8m0k26ln9deuhup0nmldf86ndu5we)
 
 <br/>

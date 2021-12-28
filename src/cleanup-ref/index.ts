@@ -1,5 +1,3 @@
-import { $$cleanupQueue, CleanupRef } from './bases'
-
 /**
  * @public
  */
@@ -16,4 +14,31 @@ export function createCleanupRef(): CleanupRef {
   return self
 }
 
-export { CleanupRef } from './bases'
+/**
+ * @public
+ */
+export const $$cleanupQueue = Symbol()
+
+/**
+ * @public
+ */
+export interface CleanupRef {
+  /**
+   * @internal
+   */
+  [$$cleanupQueue]: Array<unknown>
+  /**
+   * @public
+   */
+  run(): void
+}
+
+/**
+ * @internal
+ */
+export function appendCleanupQueue(
+  cleanupRef: CleanupRef,
+  callback: () => void
+): void {
+  cleanupRef[$$cleanupQueue].push(callback)
+}

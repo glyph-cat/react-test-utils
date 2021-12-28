@@ -38,14 +38,14 @@ describe(createHookInterface.name, () => {
     // Non-existent action
     expect(() => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore Ignored on purpose to test the error
+      // @ts-expect-error Ignored on purpose to test the error
       hookInterface.actions(['abc'])
     }).toThrow()
 
     // Non-existent value
     expect(() => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore Ignored on purpose to test the error
+      // @ts-expect-error Ignored on purpose to test the error
       hookInterface.get('abc')
     }).toThrow()
 
@@ -86,8 +86,6 @@ describe(createHookInterface.name, () => {
 
     // After increment
     await hookInterface.actionAsync('increaseCounter')
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore Ignored on purpose to test the error
     await hookInterface.actionAsync(
       'increaseCounter',
       'increaseCounter',
@@ -109,14 +107,14 @@ describe(createHookInterface.name, () => {
     // Non-existent action
     await expect(async () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore Ignored on purpose to test the error
+      // @ts-expect-error Ignored on purpose to test the error
       await hookInterface.actionAsync('abc')
     }).rejects.toThrow()
 
     // Non-existent value
     await expect(async () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore Ignored on purpose to test the error
+      // @ts-expect-error Ignored on purpose to test the error
       await hookInterface.get('abc')
     }).rejects.toThrow()
 

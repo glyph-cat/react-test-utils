@@ -1,5 +1,8 @@
-import { $$cleanupQueue, appendCleanupQueue } from './bases'
-import { createCleanupRef } from '.'
+import {
+  $$cleanupQueue,
+  appendCleanupQueue,
+  createCleanupRef,
+} from '.'
 
 describe('createCleanupRef', () => {
 

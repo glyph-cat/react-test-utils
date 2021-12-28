@@ -1,16 +1,20 @@
 {
   "compilerOptions": {
     "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "checkJs": true,
     "declaration": true,
     "declarationDir": "./temp/tsc/types",
     "esModuleInterop": true,
+    "isolatedModules": true,
     "importHelpers": false,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "Node",
     "outDir": "./temp/tsc/js",
+    "skipLibCheck": true,
     "stripInternal": true,
-    "target": "es2016"
+    "target": "ESNext"
   },
   "exclude": [
     "node_modules"

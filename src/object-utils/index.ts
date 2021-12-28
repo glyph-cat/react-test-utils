@@ -1,9 +1,4 @@
-export function propertyExists(
-  obj: Record<string, unknown>,
-  key: string
-): boolean {
-  return Object.prototype.hasOwnProperty.call(obj, key)
-}
+import { hasProperty } from '@glyph-cat/swiss-army-knife'
 
 export const NO_VALUE = {}
 
@@ -23,7 +18,7 @@ export function getItemByPath(
   const keyStack = path.split('.')
   for (let i = 0, n = keyStack.length; i < n; ++i) {
     const key = keyStack[i]
-    if (propertyExists(data, key)) {
+    if (hasProperty(data, key)) {
       data = data[key] as Record<string, unknown>
     } else {
       return NO_VALUE

@@ -83,14 +83,14 @@ test(UNSTABLE_createHocInterface.name, async (): Promise<void> => {
   // Non-existent action
   expect(() => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore Ignored on purpose to test the error
+    // @ts-expect-error Ignored on purpose to test the error
     chi.actions(['abc'])
   }).toThrow()
 
   // Non-existent values
   expect(() => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore Ignored on purpose to test the error
+    // @ts-expect-error Ignored on purpose to test the error
     chi.get('abc')
   }).toThrow()
 
