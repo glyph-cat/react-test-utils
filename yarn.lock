@@ -481,6 +481,11 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
+"@glyph-cat/eslint-config@^1.0.0-alpha.0":
+  version "1.0.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@glyph-cat/eslint-config/-/eslint-config-1.0.0-alpha.0.tgz#230ecf7965ce6a01c368c341564c0f7c9a4b9f78"
+  integrity sha512-iS+wn+sPQuC5YBw/E8d39fBDxQgRkHXwy4643vPoWQr7DDIElf3inill9LroSllWxLmIKmlUziO4+aG4M7Wznw==
+
 "@glyph-cat/swiss-army-knife@^0.0.0-experimental.1":
   version "0.0.0-experimental.1"
   resolved "https://registry.yarnpkg.com/@glyph-cat/swiss-army-knife/-/swiss-army-knife-0.0.0-experimental.1.tgz#f957342a102e74c6c0786ad7392b4eddfd569e4f"

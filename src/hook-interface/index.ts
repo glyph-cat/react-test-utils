@@ -1,4 +1,9 @@
-import { hasProperty, isThenable, useLayoutEffect } from '@glyph-cat/swiss-army-knife'
+import {
+  hasProperty,
+  isThenable,
+  useLayoutEffect,
+} from '@glyph-cat/swiss-army-knife'
+import { createElement, StrictMode } from 'react'
 import { act, create, ReactTestRenderer } from 'react-test-renderer'
 import { appendCleanupQueue, CleanupRef } from '../cleanup-ref'
 import { RootRef } from '../schema'
@@ -105,7 +110,15 @@ export function createHookInterface<
   }
 
   let root: ReactTestRenderer
-  act((): void => { root = create(<ContainerComponent />) })
+  act((): void => {
+    root = create(
+      createElement(
+        StrictMode,
+        null,
+        createElement(ContainerComponent)
+      )
+    )
+  })
   appendCleanupQueue(cleanupRef, root.unmount)
 
   // NOTE: Array of actions are batched in one `act()`

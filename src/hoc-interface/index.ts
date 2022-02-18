@@ -1,4 +1,4 @@
-import { Component as ReactComponent } from 'react'
+import { Component as ReactComponent, createElement, StrictMode } from 'react'
 import { act, create, ReactTestRenderer } from 'react-test-renderer'
 import { appendCleanupQueue, CleanupRef } from '../cleanup-ref'
 import { RootRef } from '../schema'
@@ -92,7 +92,13 @@ export function UNSTABLE_createHocInterface<A extends string, V extends string>(
     // Parameters are first applied then passed in as a component, example
     // entry: ({ Component }) => withHoc(Component, options)
     const WrappedComponent = entry({ Component })
-    root = create(<WrappedComponent />)
+    root = create(
+      createElement(
+        StrictMode,
+        null,
+        createElement(WrappedComponent)
+      )
+    )
   })
   appendCleanupQueue(cleanupRef, root.unmount)
 

@@ -7,6 +7,7 @@ import { version } from '../package.json'
 const INPUT_FILE = 'src/index.ts'
 
 const EXTERNAL_LIBS = [
+  '@glyph-cat/swiss-army-knife',
   'react',
   'react-test-renderer',
 ]
