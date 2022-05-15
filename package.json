@@ -67,6 +67,6 @@
     "typescript": "^4.6.4"
   },
   "dependencies": {
-    "@glyph-cat/swiss-army-knife": "^0.0.0-experimental.16"
+    "@glyph-cat/swiss-army-knife": "^0.0.0-experimental.17"
   }
 }
