@@ -1,53 +1,49 @@
 import { useState } from 'react'
-import { createCleanupRef } from '../cleanup-ref'
-import { createHookInterface } from '.'
+import { HookTester } from '.'
+import { CleanupManager } from '../cleanup-manager'
 
-const cleanupRef = createCleanupRef()
-afterEach(() => { cleanupRef.run() })
+const cleanupManager = new CleanupManager()
+afterEach(() => { cleanupManager.run() })
 
-describe(createHookInterface.name, () => {
+describe(HookTester.name, () => {
 
   test('Synchronous execution', (): void => {
 
-    const hookInterface = createHookInterface({
+    const hookInterface = new HookTester({
       useHook: () => useState(0),
       actions: {
-        increaseCounter({ hookData }) {
+        increaseCounter(hookData) {
           const [, setCounter] = hookData
           setCounter((c: number) => c + 1)
         },
       },
       values: {
-        value({ hookData }) {
+        value(hookData) {
           const [counter] = hookData
           return counter
         },
       },
-    }, cleanupRef)
+    }, cleanupManager)
 
     // Initial state
-    expect(hookInterface.getRenderCount()).toBe(1)
+    expect(hookInterface.renderCount).toBe(1)
     expect(hookInterface.get('value')).toBe(0)
 
     // After increment
-    hookInterface.actions('increaseCounter')
-    hookInterface.actions('increaseCounter', 'increaseCounter')
-    expect(hookInterface.getRenderCount()).toBe(3)
+    hookInterface.actionSync('increaseCounter')
+    hookInterface.actionSync('increaseCounter', 'increaseCounter')
+    expect(hookInterface.renderCount).toBe(3)
     expect(hookInterface.get('value')).toBe(3)
 
     // Non-existent action
-    expect(() => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error Ignored on purpose to test the error
-      hookInterface.actions(['abc'])
-    }).toThrow()
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error Ignored on purpose to test the error
+    expect(() => { hookInterface.actionSync('abc') }).toThrow()
 
     // Non-existent value
-    expect(() => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error Ignored on purpose to test the error
-      hookInterface.get('abc')
-    }).toThrow()
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error Ignored on purpose to test the error
+    expect(() => { hookInterface.get('abc') }).toThrow()
 
   })
 
@@ -55,10 +51,10 @@ describe(createHookInterface.name, () => {
 
     jest.useRealTimers()
 
-    const hookInterface = createHookInterface({
+    const hookInterface = new HookTester({
       useHook: () => useState(0),
       actions: {
-        increaseCounter({ hookData }): Promise<void> {
+        increaseCounter(hookData): Promise<void> {
           const [, setCounter] = hookData
           return new Promise((resolve) => {
             setTimeout(() => {
@@ -69,7 +65,7 @@ describe(createHookInterface.name, () => {
         },
       },
       values: {
-        value({ hookData }): Promise<number> {
+        value(hookData): Promise<number> {
           const [counter] = hookData
           return new Promise((resolve) => {
             setTimeout(() => {
@@ -78,37 +74,37 @@ describe(createHookInterface.name, () => {
           })
         },
       },
-    }, cleanupRef)
+    }, cleanupManager)
 
     // Initial state
-    expect(hookInterface.getRenderCount()).toBe(1)
+    expect(hookInterface.renderCount).toBe(1)
     expect((await hookInterface.get('value'))).toBe(0)
 
     // After increment
-    await hookInterface.actionAsync('increaseCounter')
-    await hookInterface.actionAsync(
+    await hookInterface.action('increaseCounter')
+    await hookInterface.action(
       'increaseCounter',
       'increaseCounter',
     )
-    expect(hookInterface.getRenderCount()).toBe(3)
+    expect(hookInterface.renderCount).toBe(3)
     expect((await hookInterface.get('value'))).toBe(2)
 
     // Experimental async actions - basically each async action will be executed
     // on one render, no more batching :(
-    await hookInterface.actionsAsync(
+    await hookInterface.action(
       'increaseCounter',
       'increaseCounter',
       'increaseCounter',
       'increaseCounter',
     )
-    expect(hookInterface.getRenderCount()).toBe(7)
+    expect(hookInterface.renderCount).toBe(7)
     expect((await hookInterface.get('value'))).toBe(6)
 
     // Non-existent action
     await expect(async () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error Ignored on purpose to test the error
-      await hookInterface.actionAsync('abc')
+      await hookInterface.action('abc')
     }).rejects.toThrow()
 
     // Non-existent value

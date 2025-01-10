@@ -1,197 +1,244 @@
+import { RenderResult, render } from '@testing-library/react'
 import {
-  hasProperty,
-  isThenable,
-  useLayoutEffect,
-} from '@glyph-cat/swiss-army-knife'
-import { createElement, StrictMode } from 'react'
-import { act, create, ReactTestRenderer } from 'react-test-renderer'
-import { appendCleanupQueue, CleanupRef } from '../cleanup-ref'
-import { RootRef } from '../schema'
+  ErrorInfo,
+  Fragment,
+  JSX,
+  Component as ReactComponent,
+  ReactNode,
+  StrictMode,
+  act,
+  createElement,
+  useEffect,
+} from 'react'
+import { CleanupManager } from '../cleanup-manager'
+import { hasProperty } from '../object-utils'
 
 /**
  * @public
  */
-export type GenericHookType = (...args: Array<unknown>) => unknown
+export type HookFn<Params extends unknown[] = [], RType = void> = (...args: Params) => RType
 
 /**
  * @public
  */
-export interface HookInterfaceActionDefinition<H extends GenericHookType> {
-  (arg: { hookData: ReturnType<H> }): void
+export type HookInterfaceActionDefinition<HookRType> = (arg: HookRType) => void | Promise<void>
+
+/**
+ * @public
+ */
+export type HookInterfaceValueMapper<HookRType> = (arg: HookRType) => unknown
+
+/**
+ * @public
+ */
+export interface HookTesterConfig<
+  HookParams extends unknown[],
+  HookRType,
+  Actions extends Record<string, HookInterfaceActionDefinition<HookRType>>,
+  Values extends Record<string, HookInterfaceValueMapper<HookRType>>
+> {
+  useHook: HookFn<HookParams, HookRType>,
+  hookParameters?: HookParams,
+  actions?: Actions,
+  values?: Values,
+  strictMode?: boolean
+}
+
+export interface ICapturedError {
+  error: Error
+  errorInfo: ErrorInfo
 }
 
 /**
  * @public
  */
-export interface HookInterfaceValueMapper<H extends GenericHookType> {
-  (arg: { hookData: ReturnType<H> }): unknown
-}
+export class HookTester<
+  HookParams extends unknown[],
+  HookRType,
+  Actions extends Record<string, HookInterfaceActionDefinition<HookRType>>,
+  Values extends Record<string, HookInterfaceValueMapper<HookRType>>
+> {
 
-/**
- * @public
- */
-export interface HookInterfaceChannel<A extends string, V extends string, H extends GenericHookType> {
-  useHook: H
-  actions?: Partial<Record<A, HookInterfaceActionDefinition<H>>>
-  values?: Partial<Record<V, HookInterfaceValueMapper<H>>>
-}
-
-/**
- * @public
- */
-export type HookInterfaceChannelsCollection<K extends string, A extends string, V extends string, H extends GenericHookType> = Record<K, HookInterfaceChannel<A, V, H>>
-
-/**
- * @public
- */
-export interface HookInterface<A extends string, V extends string> {
-  root: RootRef,
-  actions(...actionKeyStack: Array<A>): void
-  actionsAsync(...actionKeyStack: Array<A>): Promise<void>
   /**
-   * @deprecated Use `actionsAsync` instead.
+   * @internal
    */
-  actionAsync(...actionKeyStack: Array<A>): Promise<void>
-  get(valueKey: V): unknown | Promise<unknown>
-  getRenderCount(): number
-}
+  private readonly useHook: HookFn<HookParams, HookRType>
 
-/**
- * @internal
- */
-interface IOSchema<A extends string, V extends string> {
-  dispatchableActions: Partial<Record<A, () => unknown>>,
-  retrievableValues: Partial<Record<V, unknown>>,
-}
+  /**
+   * @internal
+   */
+  private readonly M$hookParameters: HookParams
 
-/**
- * A wrapper for testing a React Hook by abstracting the DOM container's logic.
- * @public
- */
-export function createHookInterface<
-  A extends string,
-  V extends string,
-  H extends GenericHookType
->(
-  config: HookInterfaceChannel<A, V, H>,
-  cleanupRef: CleanupRef
-): HookInterface<A, V> {
+  /**
+   * @internal
+   */
+  private readonly M$actions: Actions
 
-  const { useHook, actions = {}, values = {} } = config
-  let renderCount = 0
+  /**
+   * @internal
+   */
+  private readonly M$values: Values
 
-  const io: IOSchema<A, V> = {
-    dispatchableActions: {},
-    retrievableValues: {},
+  /**
+   * @internal
+   */
+  private M$renderResult!: RenderResult
+
+  /**
+   * @internal
+   */
+  private M$dispatchableActions: Partial<Record<keyof Actions, (() => void | Promise<void>)>> = {}
+
+  /**
+   * @internal
+   */
+  private M$retrievableValues: Partial<Record<keyof Values, ReturnType<Values[keyof Values]>>> = {}
+
+  /**
+   * @internal
+   */
+  private M$renderCount = 0
+  get renderCount(): number { return this.M$renderCount }
+
+  /**
+   * @internal
+   */
+  readonly M$capturedErrors: Array<ICapturedError> = []
+  get capturedErrors(): Readonly<Array<ICapturedError>> { return this.M$capturedErrors }
+
+  constructor(
+    config: HookTesterConfig<HookParams, HookRType, Actions, Values>,
+    cleanupManager?: CleanupManager
+  ) {
+
+    this.onError = this.onError.bind(this)
+    this.actionSync = this.actionSync.bind(this)
+    this.action = this.action.bind(this)
+    this.get = this.get.bind(this)
+    this.dispose = this.dispose.bind(this)
+    this.useHook = config.useHook
+    this.M$hookParameters = (config.hookParameters ? [...config.hookParameters] : []) as HookParams
+    this.M$actions = { ...config.actions } as Actions
+    this.M$values = { ...config.values } as Values
+
+    if (cleanupManager) { cleanupManager.append(this.dispose) }
+
+    this.onError = this.onError.bind(this)
+    this.actionSync = this.actionSync.bind(this)
+    this.action = this.action.bind(this)
+    this.get = this.get.bind(this)
+    this.dispose = this.dispose.bind(this)
+
+    act(() => {
+      this.M$renderResult = render(
+        createElement(
+          config.strictMode ? StrictMode : Fragment,
+          {},
+          createElement(ErrorBoundary, {
+            onError: this.onError,
+          }, createElement(this.ContainerComponent))
+        )
+      )
+    })
+
   }
 
-  const ContainerComponent = (): JSX.Element => {
-    const hookData = useHook()
-    useLayoutEffect(() => { renderCount += 1 })
+  private ContainerComponent = (): JSX.Element => {
 
-    const actionKeys = Object.keys(actions)
-    io.dispatchableActions = {}
-    for (const actionKey of actionKeys) {
-      const actionCallback = actions[actionKey]
-      io.dispatchableActions[actionKey] = (): unknown => {
-        return actionCallback({ hookData })
+    const { useHook } = this
+    const hookData = useHook(...this.M$hookParameters)
+    useEffect(() => { this.M$renderCount += 1 })
+
+    this.M$dispatchableActions = {}
+    for (const actionKey in this.M$actions) {
+      const actionCallback = this.M$actions[actionKey]
+      this.M$dispatchableActions[actionKey] = () => {
+        return actionCallback(hookData)
       }
     }
 
-    const valueKeys = Object.keys(values)
-    io.retrievableValues = {}
-    for (const valueKey of valueKeys) {
-      const valueMapper = values[valueKey]
-      const mappedValue = valueMapper({ hookData })
-      io.retrievableValues[valueKey] = mappedValue
+    this.M$retrievableValues = {}
+    for (const valueKey in this.M$values) {
+      const valueMapper = this.M$values[valueKey]
+      const mappedValue = valueMapper(hookData) as ReturnType<Values[keyof Values]>
+      this.M$retrievableValues[valueKey] = mappedValue
     }
 
-    return null
+    return createElement(Fragment)
+
   }
 
-  let root: ReactTestRenderer
-  act((): void => {
-    root = create(
-      createElement(
-        StrictMode,
-        null,
-        createElement(ContainerComponent)
-      )
-    )
-  })
-  appendCleanupQueue(cleanupRef, root.unmount)
+  private onError(error: Error, errorInfo: ErrorInfo): void {
+    this.M$capturedErrors.push({ error, errorInfo })
+  }
 
-  // NOTE: Array of actions are batched in one `act()`
-  const METHOD_actions = (...actionKeyStack: Array<A>): void => {
+  actionSync(...actionKeys: Array<keyof Actions>): number {
+    const previousRenderCount = this.M$renderCount
     act((): void => {
-      for (const actionKey of actionKeyStack) {
-        if (hasProperty(io.dispatchableActions, actionKey)) {
-          io.dispatchableActions[actionKey]()
+      for (const actionKey of actionKeys) {
+        if (hasProperty(this.M$dispatchableActions, actionKey)) {
+          this.M$dispatchableActions[actionKey]()
         } else {
-          throw new ReferenceError(`Action '${actionKey}' does not exist`)
+          throw new ReferenceError(`Action '${actionKey as string}' does not exist`)
         }
       }
     })
+    return this.M$renderCount - previousRenderCount
   }
 
-  const METHOD_actionsAsync = async (
-    ...actionKeyStack: Array<A>
-  ): Promise<void> => {
+  async action(...actionKeys: Array<keyof Actions>): Promise<number> {
+    const previousRenderCount = this.M$renderCount
     await act(async (): Promise<void> => {
-      for (const actionKey of actionKeyStack) {
-        if (hasProperty(io.dispatchableActions, actionKey)) {
-          await io.dispatchableActions[actionKey]()
+      for (const actionKey of actionKeys) {
+        if (hasProperty(this.M$dispatchableActions, actionKey)) {
+          await this.M$dispatchableActions[actionKey]()
         } else {
-          throw new ReferenceError(`Action '${actionKey}' does not exist`)
+          throw new ReferenceError(`Action '${actionKey as string}' does not exist`)
         }
       }
     })
+    return this.M$renderCount - previousRenderCount
   }
 
-  const METHOD_actionAsync = async (
-    actionKey: A,
-    ...otherActionKeys: Array<A>
-  ): Promise<void> => {
-    if (otherActionKeys.length !== 0) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        'Batch-executing actions does not work in `actionAsync` because ' +
-        'components will re-render before the next asynchronous action(s) ' +
-        'can run.\n' +
-        `In: .actionAsync('${actionKey}', '${otherActionKeys.join('\', \'')}')`
-      )
-    }
-    await act(async (): Promise<void> => {
-      if (hasProperty(io.dispatchableActions, actionKey)) {
-        await io.dispatchableActions[actionKey]()
-      } else {
-        throw new ReferenceError(`Async action '${actionKey}' does not exist`)
-      }
-    })
-  }
-
-  const METHOD_get = (valueKey: V): unknown | Promise<unknown> => {
-    if (hasProperty(io.retrievableValues, valueKey)) {
-      const retrievedValue = io.retrievableValues[valueKey]
-      if (isThenable(retrievedValue)) {
-        return new Promise((resolve) => {
-          retrievedValue.then(resolve)
-        })
-      } else {
-        return retrievedValue
-      }
+  get(valueKey: keyof Values): ReturnType<Values[keyof Values]> {
+    if (hasProperty(this.M$retrievableValues, valueKey)) {
+      return this.M$retrievableValues[valueKey]
     } else {
-      throw new ReferenceError(`Value '${valueKey}' does not exist`)
+      throw new ReferenceError(`Value '${valueKey as string}' does not exist`)
     }
   }
 
-  return {
-    root: { current: root },
-    actions: METHOD_actions,
-    actionAsync: METHOD_actionAsync,
-    actionsAsync: METHOD_actionsAsync,
-    get: METHOD_get,
-    getRenderCount: () => renderCount
+  dispose(): void {
+    this.M$renderResult?.unmount()
+  }
+
+}
+
+interface ErrorBoundaryProps {
+  children?: ReactNode
+  onError(error: Error, errorInfo: ErrorInfo): void
+}
+
+interface ErrorBoundaryState {
+  error: boolean
+}
+
+class ErrorBoundary extends ReactComponent<ErrorBoundaryProps, ErrorBoundaryState> {
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { error: true }
+  }
+
+  state: Readonly<ErrorBoundaryState> = { error: false }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo)
+    }
+  }
+
+  render(): ReactNode {
+    return this.state.error ? null : this.props.children
   }
 
 }
