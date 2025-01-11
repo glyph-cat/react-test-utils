@@ -18,7 +18,7 @@ import { CleanupManager } from '../cleanup-manager'
  * @public
  */
 export interface HOCTesterConfig<Actions extends Record<string, (props: any) => void>, Values extends Record<string, (hocData: ReturnType<any>) => string>> {
-  factory(component: ComponentType): ComponentType
+  factory(component: ComponentType<any>): ComponentType<any>
   actions?: Actions
   values?: Values
   strictMode?: boolean
@@ -108,25 +108,11 @@ export class HOCTester<Actions extends Record<string, (props: any) => void>, Val
     return class ContainerComponent extends ReactComponent {
 
       render(): JSX.Element {
-        return null!
-      }
 
-      componentDidMount(): void {
-        this.componentDidEffect()
-      }
-
-      componentDidUpdate(): void {
-        this.componentDidEffect()
-      }
-
-      componentDidEffect(): void {
-        tester.M$renderCount += 1
         tester.M$dispatchableActions = {}
         for (const actionKey in tester.M$actions) {
           const actionCallback = tester.M$actions[actionKey]
-          tester.M$dispatchableActions[actionKey] = () => {
-            actionCallback(this.props)
-          }
+          tester.M$dispatchableActions[actionKey] = () => actionCallback(this.props)
         }
 
         tester.M$retrievableValues = {}
@@ -135,6 +121,16 @@ export class HOCTester<Actions extends Record<string, (props: any) => void>, Val
           const mappedValue = valueMapper(this.props) as ReturnType<Values[keyof Values]>
           tester.M$retrievableValues[valueKey] = mappedValue
         }
+
+        return null!
+      }
+
+      componentDidMount(): void {
+        tester.M$renderCount += 1
+      }
+
+      componentDidUpdate(): void {
+        tester.M$renderCount += 1
       }
 
     }

@@ -1,3 +1,4 @@
+export * from './abstractions'
 export * from './api/cleanup-manager'
 export * from './api/hoc-tester'
 export * from './api/hook-tester'

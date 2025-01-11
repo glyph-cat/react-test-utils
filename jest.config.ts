@@ -5,6 +5,7 @@ const config: Config.InitialOptions = {
     '.draft',
     '.old',
   ],
+  testEnvironment: 'jsdom',
   testTimeout: 1000,
   fakeTimers: {
     enableGlobally: true,

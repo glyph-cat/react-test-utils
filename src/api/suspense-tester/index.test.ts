@@ -18,10 +18,14 @@ test('Happy Path', async () => {
 
   expect(suspenseTester.componentIsUnderSuspense).toBe(false)
 
-  act(() => { InitState.set(true) })
+  // NOTE: under the hood, `act` always runs asynchronously.
+  // Since we are waiting for a suspension (a.k.a. thrown promise) to resolve,
+  // we should use await.
+
+  await act(async () => { InitState.set(true) })
   expect(suspenseTester.componentIsUnderSuspense).toBe(true)
 
-  act(() => { InitState.set(false) })
+  await act(async () => { InitState.set(false) })
   expect(suspenseTester.componentIsUnderSuspense).toBe(false)
 
 })

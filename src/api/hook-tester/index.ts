@@ -143,12 +143,12 @@ export class HookTester<
     const hookData = useHook(...this.M$hookParameters)
     useEffect(() => { this.M$renderCount += 1 })
 
-    this.M$dispatchableActions = {}
     for (const actionKey in this.M$actions) {
       const actionCallback = this.M$actions[actionKey]
-      this.M$dispatchableActions[actionKey] = () => {
-        actionCallback(hookData)
-      }
+      this.M$dispatchableActions[actionKey] = () => actionCallback(hookData)
+      // Although we do not expect any returned value, returning the callback's
+      // returned value is necessary for promises to recognized so that they
+      // can be awaited properly.
     }
 
     this.M$retrievableValues = {}

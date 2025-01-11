@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { HookTester } from '.'
-import { CleanupManager } from '../cleanup-manager'
 import { ActionNotExistError, ValueNotExistError } from '../../errors'
+import { TestUtils } from '../../test-utils'
+import { CleanupManager } from '../cleanup-manager'
 
 const cleanupManager = new CleanupManager()
 afterEach(() => { cleanupManager.run() })
@@ -30,6 +31,10 @@ test('Synchronous execution', (): void => {
 
   // After increment
   tester.action('increaseCounter')
+  expect(tester.renderCount).toBe(2)
+  expect(tester.get('value')).toBe(1)
+
+  // After another increment
   tester.action('increaseCounter', 'increaseCounter')
   expect(tester.renderCount).toBe(3)
   expect(tester.get('value')).toBe(3)
@@ -51,51 +56,46 @@ test('Asynchronous execution', async (): Promise<void> => {
   const tester = new HookTester({
     useHook: () => useState(0),
     actions: {
-      increaseCounter(hookData): Promise<void> {
+      async increaseCounter(hookData): Promise<void> {
         const [, setCounter] = hookData
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            setCounter((c: number) => c + 1)
-            resolve()
-          }, 100)
-        })
+        await TestUtils.delay(100)
+        setCounter((c: number) => c + 1)
       },
     },
     values: {
-      value(hookData): Promise<number> {
+      value(hookData): number {
         const [counter] = hookData
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(counter)
-          }, 100)
-        })
+        return counter
       },
     },
   }, cleanupManager)
 
   // Initial state
   expect(tester.renderCount).toBe(1)
-  expect((await tester.get('value'))).toBe(0)
+  expect((tester.get('value'))).toBe(0)
 
   // After increment
   await tester.actionAsync('increaseCounter')
+  expect(tester.renderCount).toBe(2)
+  expect(tester.get('value')).toBe(1)
+
+  // After another increment
   await tester.actionAsync(
     'increaseCounter',
     'increaseCounter',
   )
   expect(tester.renderCount).toBe(3)
-  expect((await tester.get('value'))).toBe(2)
+  expect(tester.get('value')).toBe(3)
 
-  // Experimental async actions - basically each async action will be executed
-  // on one render, no more batching :(
+  // Every set of actions called in `action` or `actionAsync` will be batched.
   await tester.actionAsync(
     'increaseCounter',
     'increaseCounter',
     'increaseCounter',
     'increaseCounter',
   )
-  expect(tester.renderCount).toBe(7)
-  expect((await tester.get('value'))).toBe(6)
+  expect(tester.renderCount).toBe(4)
+  expect(tester.get('value')).toBe(7)
 
   // Non-existent action
   await expect(async () => {
@@ -104,9 +104,7 @@ test('Asynchronous execution', async (): Promise<void> => {
   }).rejects.toThrow(ActionNotExistError)
 
   // Non-existent value
-  await expect(async () => {
-    // @ts-expect-error Ignored on purpose to test the error
-    await tester.get('abc')
-  }).rejects.toThrow(ValueNotExistError)
+  // @ts-expect-error Ignored on purpose to test the error
+  expect(() => { tester.get('abc') }).toThrow(ValueNotExistError)
 
 })

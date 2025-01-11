@@ -12,7 +12,8 @@
     "clean": "rm -rf ./lib ./temp ./yarn-error.log && mkdir temp lib",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "jest ./src",
+    "lint:path": "eslint",
+    "test": "jest -c ./jest.config.ts",
     "rollup": "rollup -c ./config/rollup.config.js",
     "tsc": "tsc --declaration",
     "api": "api-extractor run -c ./config/api-extractor.json --local --verbose",
@@ -36,7 +37,10 @@
     "url": "https://github.com/glyph-cat/react-test-utils/issues"
   },
   "homepage": "https://github.com/glyph-cat/react-test-utils#readme",
-  "dependencies": {},
+  "dependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.1.0"
+  },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@babel/plugin-transform-modules-commonjs": "^7.26.3",
@@ -44,29 +48,28 @@
     "@babel/preset-react": "^7.26.3",
     "@babel/preset-typescript": "^7.26.0",
     "@glyph-cat/eslint-config": "^1.0.1-alpha.12",
-    "@microsoft/api-extractor": "^7.49.0",
+    "@microsoft/api-extractor": "^7.49.1",
     "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-replace": "^6.0.2",
-    "@testing-library/react": "^16.1.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.5",
-    "@types/react": "^19.0.3",
+    "@types/react": "^19.0.4",
     "@types/react-dom": "^19.0.2",
-    "eslint": "^9.17.0",
+    "eslint": "^9.18.0",
     "eslint-plugin-functional": "^7.2.1",
     "eslint-plugin-jest": "^28.10.0",
     "eslint-plugin-react": "^7.37.3",
     "eslint-plugin-react-hooks": "^5.1.0",
     "globals": "^15.14.0",
     "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "rollup": "^4.30.1",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.36.0",
     "ts-node": "^10.9.2",
-    "tsc": "^2.0.4",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.3"
   }
 }
