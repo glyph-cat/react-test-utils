@@ -2,6 +2,9 @@ import { RenderResult, render } from '@testing-library/react'
 import { ComponentType, JSX, Suspense, act, createElement, useEffect } from 'react'
 import { CleanupManager } from '../cleanup-manager'
 
+/**
+ * @public
+ */
 export class SuspenseTester {
 
   /**
@@ -28,7 +31,7 @@ export class SuspenseTester {
         this.M$componentIsUnderSuspense = true
         return () => { this.M$componentIsUnderSuspense = false }
       }, [])
-      return null
+      return null!
     }
 
     this.dispose = this.dispose.bind(this)

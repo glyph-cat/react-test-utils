@@ -20,7 +20,7 @@ export class CleanupManager {
   run(): void {
     while (this.M$queue.length > 0) {
       const cleanupCallback = this.M$queue.shift()
-      cleanupCallback()
+      cleanupCallback?.()
     }
   }
 

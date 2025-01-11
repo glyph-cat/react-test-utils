@@ -1,4 +1,5 @@
-export * from './cleanup-manager'
+export * from './api/cleanup-manager'
+export * from './api/hoc-tester'
+export * from './api/hook-tester'
 export * from './constants/public'
-// export * from './hoc-interface'
-export * from './hook-interface'
+export * from './errors'
