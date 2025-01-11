@@ -18,7 +18,7 @@
     "tsc": "tsc --declaration",
     "api": "api-extractor run -c ./config/api-extractor.json --local --verbose",
     "build": "sh ./scripts/run/build.sh",
-    "all": "yarn clean && yarn lint:fix && yarn build && yarn test && yarn pack"
+    "all": "yarn clean && yarn lint && yarn build && yarn test && yarn pack"
   },
   "keywords": [
     "React",
