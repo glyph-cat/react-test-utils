@@ -68,7 +68,7 @@ export class HOCTester<Actions extends Record<string, (props: any) => void>, Val
 
   constructor(
     config: HOCTesterConfig<Actions, Values>,
-    cleanupManager?: CleanupManager
+    cleanupManager: CleanupManager
   ) {
 
     this.onError = this.onError.bind(this)

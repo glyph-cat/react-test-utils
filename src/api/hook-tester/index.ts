@@ -103,7 +103,7 @@ export class HookTester<
 
   constructor(
     config: HookTesterConfig<HookParams, HookReturnedType, Actions, Values>,
-    cleanupManager?: CleanupManager
+    cleanupManager: CleanupManager
   ) {
 
     this.onError = this.onError.bind(this)
