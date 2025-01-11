@@ -6,9 +6,6 @@ Helper functions for writing tests for [React](https://reactjs.org) with [Jest](
 
 [![Version](https://img.shields.io/npm/v/@glyph-cat/react-test-utils)](https://github.com/glyph-cat/react-test-utils/releases)
 [![License](https://img.shields.io/github/license/glyph-cat/react-test-utils)](https://github.com/glyph-cat/react-test-utils/blob/main/LICENSE)
-
-![Designed for React](https://img.shields.io/static/v1?label&logo=react&logoColor=61DBFB&message=Designed%20for%20React&color=4a4a4a)
-[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/glyph-cat/react-test-utils)
 [![Support me on Ko-fi](https://img.shields.io/static/v1?label&logo=kofi&logoColor=ffffff&message=Support%20me%20on%20Ko-fi&color=FF5E5B)](https://ko-fi.com/glyphcat)
 
 </div>
@@ -19,53 +16,50 @@ Helper functions for writing tests for [React](https://reactjs.org) with [Jest](
 
 ```js
 import { useState } from 'react'
-import {
-  createCleanupRef,
-  createHookInterface,
-} from '@glyph-cat/react-test-utils'
+import { CleanupManager, HookTester } from '@glyph-cat/react-test-utils'
 
-const cleanupRef = createCleanupRef()
-afterEach(() => { cleanupRef.run() })
+const cleanupManager = new CleanupManager()
+afterEach(() => { cleanupManager.run() })
 
-test('createHookInterface', () => {
-  const hookInterface = createHookInterface({
+test('Example', async () => {
+  
+  const tester = new HookTester({
     useHook: () => useState(0),
     actions: {
-      increaseCounter({ hookData }) {
+      increaseCounter(hookData) {
         const [, setCounter] = hookData
         setCounter((c: number) => c + 1)
       },
     },
     values: {
-      value({ hookData }) {
+      value(hookData) {
         const [counter] = hookData
         return counter
       },
     },
-  }, cleanupRef)
+  }, cleanupManager)
 
   // Trigger one action
-  hookInterface.actions('increaseCounter')
+  tester.action('increaseCounter')
 
   // Trigger multiple actions in the same render
-  hookInterface.actions('increaseCounter', 'increaseCounter')
+  tester.action('increaseCounter', 'increaseCounter')
 
-  // Trigger multiple asynchronous actions
-  // No longer guaranteed that all actions will run in the same render cycle
-  hookInterface.actionsAsync('increaseCounter', 'increaseCounter')
+  // Trigger multiple async actions in the same render
+  await tester.actionAsync('increaseCounter', 'increaseCounter')
 
   // Get render count
-  expect(hookInterface.getRenderCount()).toBe(2)
+  expect(tester.renderCount).toBe(2)
 
   // Get value
-  expect(hookInterface.get('value')).toBe(3)
+  expect(tester.get('value')).toBe(3)
 
 })
 ```
 
 # Full Examples
-* [`createHookInterface`](https://github.com/glyph-cat/react-test-utils/blob/main/src/hook-interface/index.test.ts)
-* [`UNSTABLE_createHocInterface`](https://github.com/glyph-cat/react-test-utils/blob/main/src/hoc-interface/index.test.tsx)
+* [`HookTester`](https://github.com/glyph-cat/react-test-utils/blob/main/src/api/hook-tester/index.test.ts)
+* [`HOCTester`](https://github.com/glyph-cat/react-test-utils/blob/main/src/api/hoc-tester/index.test.tsx)
 
 <br/>
 
