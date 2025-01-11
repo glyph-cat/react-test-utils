@@ -1,3 +1,5 @@
+// NOTE: Adapted from 'cotton-box'.
+
 export function hasProperty(
   object: unknown,
   propertyName: PropertyKey
