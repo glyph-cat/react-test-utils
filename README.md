@@ -15,8 +15,9 @@ Helper functions for writing tests for [React](https://reactjs.org) with [Jest](
 # Simple Example
 
 ```js
+import { CleanupManager } from '@glyph-cat/cleanup-manager'
+import { HookTester } from '@glyph-cat/react-test-utils'
 import { useState } from 'react'
-import { CleanupManager, HookTester } from '@glyph-cat/react-test-utils'
 
 const cleanupManager = new CleanupManager()
 afterEach(() => { cleanupManager.run() })

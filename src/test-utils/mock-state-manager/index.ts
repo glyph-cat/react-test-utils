@@ -1,4 +1,4 @@
-import { CleanupManager } from '../../api/cleanup-manager'
+import { CleanupManager } from '@glyph-cat/cleanup-manager'
 import { Watcher } from '../watcher'
 
 // NOTE: Adapted from 'cotton-box'.

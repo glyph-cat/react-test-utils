@@ -1,6 +1,6 @@
+import { CleanupManager } from '@glyph-cat/cleanup-manager'
 import { RenderResult, render } from '@testing-library/react'
 import { ComponentType, JSX, Suspense, act, createElement, useEffect } from 'react'
-import { CleanupManager } from '../cleanup-manager'
 
 /**
  * @public

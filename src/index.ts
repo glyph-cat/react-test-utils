@@ -1,6 +1,6 @@
 export * from './abstractions'
-export * from './api/cleanup-manager'
 export * from './api/hoc-tester'
 export * from './api/hook-tester'
+export * from './api/suspense-tester'
 export * from './constants/public'
 export * from './errors'

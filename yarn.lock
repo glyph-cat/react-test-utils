@@ -608,6 +608,11 @@
     "@eslint/core" "^0.10.0"
     levn "^0.4.1"
 
+"@glyph-cat/cleanup-manager@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@glyph-cat/cleanup-manager/-/cleanup-manager-1.0.0.tgz#5d12d3f3aacdc1ea2631d92635934fd3b6841f3b"
+  integrity sha512-k2rL1VALk+KQ8/48UJ0iPOCREh7T3ouxc36HaMTM3K8iDDjK43U1ek5x4zvMPhfIfRSHdCaS01QEZ0NQr2RG9Q==
+
 "@glyph-cat/eslint-config@^1.0.1-alpha.12":
   version "1.0.1-alpha.12"
   resolved "https://registry.yarnpkg.com/@glyph-cat/eslint-config/-/eslint-config-1.0.1-alpha.12.tgz#296ebcbbcf6585d2337052f3b3f5fe45ac317529"

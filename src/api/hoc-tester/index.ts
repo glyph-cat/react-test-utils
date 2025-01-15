@@ -1,3 +1,4 @@
+import { CleanupManager } from '@glyph-cat/cleanup-manager'
 import { render, RenderResult } from '@testing-library/react'
 import {
   act,
@@ -12,7 +13,6 @@ import {
 import { ICapturedError } from '../../abstractions'
 import { ActionNotExistError, ValueNotExistError } from '../../errors'
 import { ErrorBoundary, hasProperty } from '../../internals'
-import { CleanupManager } from '../cleanup-manager'
 
 /**
  * @public

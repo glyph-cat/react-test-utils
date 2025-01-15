@@ -1,8 +1,8 @@
+import { CleanupManager } from '@glyph-cat/cleanup-manager'
 import { ComponentType, Component as ReactComponent, useState } from 'react'
 import { HOCTester } from '.'
 import { ActionNotExistError, ValueNotExistError } from '../../errors'
 import { TestUtils } from '../../test-utils'
-import { CleanupManager } from '../cleanup-manager'
 
 const cleanupManager = new CleanupManager()
 afterEach(() => { cleanupManager.run() })
