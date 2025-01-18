@@ -1,5 +1,5 @@
 import { CleanupManager } from '@glyph-cat/cleanup-manager'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { HookTester } from '.'
 import { ActionNotExistError, ValueNotExistError } from '../../errors'
 import { TestUtils } from '../../test-utils'
@@ -106,5 +106,15 @@ test('Asynchronous execution', async (): Promise<void> => {
   // Non-existent value
   // @ts-expect-error Ignored on purpose to test the error
   expect(() => { tester.get('abc') }).toThrow(ValueNotExistError)
+
+})
+
+test('Hook returned value', () => {
+
+  const tester = new HookTester({
+    useHook: () => useRef(42),
+  }, cleanupManager)
+
+  expect(tester.hookReturnedValue).toStrictEqual({ current: 42 })
 
 })

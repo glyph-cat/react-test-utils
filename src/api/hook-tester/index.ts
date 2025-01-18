@@ -92,6 +92,12 @@ export class HookTester<
   /**
    * @internal
    */
+  private M$hookReturnedValue: HookReturnedType
+  get hookReturnedValue(): HookReturnedType { return this.M$hookReturnedValue }
+
+  /**
+   * @internal
+   */
   private M$renderCount = 0
   get renderCount(): number { return this.M$renderCount }
 
@@ -151,6 +157,7 @@ export class HookTester<
       // can be awaited properly.
     }
 
+    this.M$hookReturnedValue = hookData
     this.M$retrievableValues = {}
     for (const valueKey in this.M$values) {
       const valueMapper = this.M$values[valueKey]
