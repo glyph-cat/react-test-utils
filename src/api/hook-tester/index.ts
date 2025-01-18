@@ -77,11 +77,6 @@ export class HookTester<
   /**
    * @internal
    */
-  private M$renderResult!: RenderResult
-
-  /**
-   * @internal
-   */
   private M$dispatchableActions: Partial<Record<keyof Actions, (() => void | Promise<void>)>> = {}
 
   /**
@@ -100,6 +95,12 @@ export class HookTester<
    */
   private M$renderCount = 0
   get renderCount(): number { return this.M$renderCount }
+
+  /**
+   * @internal
+   */
+  private M$renderResult!: RenderResult
+  get renderResult(): RenderResult { return this.M$renderResult }
 
   /**
    * @internal
