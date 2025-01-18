@@ -1,6 +1,6 @@
 {
   "name": "@glyph-cat/react-test-utils",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Helper functions for writing tests for React with Jest and @testing-library/react.",
   "main": "lib/cjs/index.js",
   "module": "lib/es/index.js",
