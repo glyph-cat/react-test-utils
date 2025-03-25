@@ -1,3 +1,7 @@
+This repository has been merged into [`@glyph-cat/swiss-army-knife`](https://github.com/glyph-cat/swiss-army-knife/tree/main/src/packages/react-test-utils#readme).
+
+---
+
 Helper functions for writing tests for [React](https://reactjs.org) with [Jest](https://reactjs.org) and [react-test-renderer](https://www.npmjs.com/package/react-test-renderer).
 
 <br/>
